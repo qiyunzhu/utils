@@ -5,4 +5,4 @@ This repository hosts a collection of single-file scripts I wrote that may be us
 
 ## [list_all_authors.py](list_all_authors.py)
 
-Generates a list of authors with the PMID and date of the last paper of each author as well as the number of papers co-authored from a Medline-formatted PubMed paper list. Useful for batch-populating the collaborators and other affiliations (COA) table for grant agencies.
+Generates a list of authors with their information on the last paper of each author as well as the number of papers co-authored from a Medline-formatted PubMed paper list. Useful for populating the collaborators and other affiliations (COA) table for grant agencies.

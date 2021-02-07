@@ -4,11 +4,11 @@
 PubMed author list generator
 
 Description:
-    Generates a list of authors with the PMID and date of the last co-authored
+    Generates a list of authors with their information on the last co-authored
     paper of each author as well as the number of papers co-authored from an
     Medline-formatted PubMed paper list.
-    Useful for batch-populating the NSF collaborators and other affiliations
-    (COA) table.
+    Useful for populating the collaborators and other affiliations (COA) table
+    for grant agencies.
 
 Usage:
     Navigate to: NCBI - My Bibliography - select all - Manage citations - Export
