@@ -417,6 +417,31 @@ def rename_paths(code, data, names=None):
             'pathway'].items()}
 
 
+def get_ecs(definition):
+    """Extract EC numbers from a KO definition.
+
+    Parameters
+    ----------
+    definition : str
+        KO definition.
+
+    Returns
+    -------
+    list of str
+        Extracted EC numbers.
+
+    Examples
+    --------
+    K00930  acetylglutamate kinase [EC:2.7.2.8]
+    K02618  oxepin-CoA hydrolase [EC:3.3.2.12 1.2.1.91]
+    K09866  aquaporin-4
+    """
+    if definition.endswith(']'):
+        idx = definition.find(' [EC:')
+        if idx > 0:
+            return definition[idx + 5:-1].split()
+
+
 def get_compounds(equation):
     """Extract compound entries from an equation.
 
@@ -428,17 +453,28 @@ def get_compounds(equation):
     Returns
     -------
     list of str
-        Extracted compound entries.
+        Compounds extracted from the left side of equation.
+    list of str
+        Compounds extracted from the right side of equation.
 
     Examples
     --------
+    C00068 + C00001 <=> C01081 + C00009
     C00029 + C00001 + 2 C00003 <=> C00167 + 2 C00004 + 2 C00080
+    G10481(n+1) + G10620 <=> G10481(n) + G11108
+    C17207(n) + (n-2) C00009 <=> C20861 + (n-2) C00636
     """
     res = []
-    for field in equation.split():
-        if len(field) == 6 and field[0] == 'C' and field[1:].isdigit():
-            res.append(field)
-    return sorted(set(res))
+    for side in equation.split(' <=> '):
+        cpds = []
+        for field in side.split(' + '):
+            idx = field.find('C')
+            if idx >= 0:
+                cpd = field[idx:idx + 6]
+                if len(cpd) == 6 and cpd[1:].isdigit():
+                    cpds.append(cpd)
+        res.append(sorted(set(cpds)))
+    return res
 
 
 def get_classes(data, key='class'):
@@ -484,6 +520,11 @@ def main():
     mkeys = ('module', 'pathway', 'disease', 'dblinks')
     f = partial(parse_flat, skeys=skeys, mkeys=mkeys)
     data = batch_query(kos, 'get', f, name='KOs')
+    for ko, datum in data.items():
+        if 'definition' in datum:
+            ecs = get_ecs(datum['definition'])
+            if ecs:
+                datum['ec'] = ecs
     names = extract_targets(data, ('module', 'pathway', 'disease'))
     extract_dblinks(data, {'RN': 'reaction', 'COG': 'cog', 'GO': 'go'})
     mds = names['module'].keys()
@@ -491,7 +532,7 @@ def main():
     dses = names['disease'].keys()
     rns = set().union(*[x['reaction'] for x in data.values()
                         if 'reaction' in x])
-    mkeys = ('module', 'pathway', 'disease', 'reaction', 'cog', 'go')
+    mkeys = ('module', 'pathway', 'disease', 'ec', 'reaction', 'cog', 'go')
     write_all('ko', data, skeys, mkeys)
 
     # reaction
@@ -504,10 +545,18 @@ def main():
         if 'enzyme' in datum:
             datum['enzyme'] = datum['enzyme'].split()
         if 'equation' in datum:
-            datum['compound'] = get_compounds(datum['equation'])
+            left, right = get_compounds(datum['equation'])
+            if left:
+                datum['left_compound'] = left
+            if right:
+                datum['right_compound'] = right
+            both = sorted(set(left + right))
+            if both:
+                datum['compound'] = both
     rename_paths('rn', data, names)
     skeys = ('name', 'definition', 'equation')
-    mkeys = ('orthology', 'module', 'pathway', 'rclass', 'enzyme', 'compound')
+    mkeys = ('orthology', 'module', 'pathway', 'rclass', 'enzyme', 'compound',
+             'left_compound', 'right_compound')
     write_all('reaction', data, skeys, mkeys)
     cpds = set().union(*[x['compound'] for x in data.values()
                          if 'compound' in x])
