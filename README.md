@@ -17,3 +17,8 @@ Orthology (KO) entries from the [KEGG server](https://www.kegg.jp/kegg/) using t
 ## [metacyc_build.py](metacyc_build.py)
 
 Extract hierarchical mappings and descriptions from a local copy of the [MetaCyc](https://metacyc.org/) database.
+
+
+## [go_build.py](go_build.py)
+
+Extract hierarchical mappings and descriptions from the [Gene Ontology](http://geneontology.org/) (GO) database.
