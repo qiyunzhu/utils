@@ -8,6 +8,11 @@ This repository hosts a collection of single-file scripts I wrote that may be us
 Generates a list of authors with their information on the last paper of each author as well as the number of papers co-authored from a Medline-formatted PubMed paper list. Useful for populating the collaborators and other affiliations (COA) table for grant agencies.
 
 
+## [refseq_build.py](refseq_build.py)
+
+Sample, download and organize a reference genome database from [NCBI RefSeq](https://www.ncbi.nlm.nih.gov/refseq/).
+
+
 ## [kegg_query.py](kegg_query.py)
 
 Fetch hierarchical mappings and descriptions of a given list of KEGG
