@@ -55,8 +55,9 @@ Sample, download and organize a reference genome database from NCBI RefSeq.
 server = 'rsync://ftp.ncbi.nlm.nih.gov'
 
 arguments = [
-    'Default protocol',
-    ['--default',    'Apply the default protocol.', {'action': 'store_true'}],
+    'Protocols',
+    ['-p|--protocol', 'Apply a pre-defined protocol.', {'choices': [
+        'basic', 'standard', 'extended', 'extreme']}],
 
     'Basic',
     ['-o|--output',  'Output directory.', {'required': True}],
@@ -79,7 +80,8 @@ arguments = [
 
     'Taxon sampling',
     ['-s|--sample',  'Sample up to this number of genomes per taxonomic '
-                     'group at given rank (0 for all).', {'type': int}],
+                     'group at given rank (0 for none, omit for all).',
+                     {'type': int}],
     ['-r|--rank',    'Taxonomic rank at which sampling will be performed '
                      '(default: species).', {'default': 'species'}],
     ['--above',      'Sampling will also be performed on ranks from the '
@@ -246,18 +248,40 @@ class Database(object):
         for key, val in vars(args).items():
             setattr(self, key, val)
 
-        # default protocol
-        if self.default:
-            print('The default protocol is selected for database building.')
-            print('The program will sample NCBI RefSeq genomes under the '
-                  'categories of bacteria, archaea, fungi, protozoa and '
-                  'viral, keep one genome per species, plus all NCBI-defined '
-                  'reference and representative genomes.')
-            self.cats = 'microbe'
+        # default protocols
+        protocol = self.protocol
+        if protocol == 'basic':
+            print('Basic protocol: Sample one complete genome per genus.')
             self.sample = 1
-            self.rank = 'species'
+            self.rank = 'genus'
+            self.complete = True
+        elif protocol == 'standard':
+            print('Standard protocol: Collect all NCBI-defined reference and '
+                  'representative genomes.')
+            self.sample = 0
             self.reference = True
             self.represent = True
+        elif protocol == 'extended':
+            print('Extended protocol: Sample one genome per species that has '
+                  'a Latinate name, as well as higher ranks, also include all'
+                  ' reference, representative, and type material genomes.')
+            self.sample = 1
+            self.rank = 'species_latin'
+            self.above = True
+            self.reference = True
+            self.represent = True
+            self.typemater = True
+        elif protocol == 'extreme':
+            print('Extreme protocol: Sample one genome per species and '
+                  'higher ranks from both RefSeq and GenBank, also include '
+                  'all reference, representative, and type material genomes.')
+            self.sample = 1
+            self.rank = 'species'
+            self.above = True
+            self.genbank = True
+            self.reference = True
+            self.represent = True
+            self.typemater = True
 
         # create target directories
         makedirs(self.output, exist_ok=True)
@@ -513,6 +537,7 @@ class Database(object):
         self.selected, n = set(), 0
         rank, sample, latin = self.rank, self.sample, False
         if sample is None:
+            self.selected = set(self.df['genome'])
             return
         print('Sampling genomes based on taxonomy...')
 
@@ -614,8 +639,7 @@ class Database(object):
             self.df['ftp_path'].to_csv(
                 join(self.output, 'urls.txt'), header=False, index=False)
             print(f'URLs of sampled genomes written to {fname}. You may '
-                  'manually download their protein sequence data to faa/, '
-                  'then restart the database building pipeline.')
+                  'manually download them later.')
             sys.exit(0)
 
         print('Downloading non-redundant genomic data from NCBI...',
