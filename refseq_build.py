@@ -8,7 +8,11 @@ Notes:
     This script is ported from the following code, also written by me, with
     modifications.
 
-    https://github.com/qiyunlab/HGTector/blob/master/hgtector/database.py
+    - https://github.com/qiyunlab/HGTector/blob/master/hgtector/database.py
+
+    License: BSD 3-Clause
+
+    - https://github.com/qiyunlab/HGTector/blob/master/LICENSE
 """
 
 import sys
