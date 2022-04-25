@@ -124,7 +124,7 @@ arguments = [
                      'Othewise, use existing files whenever available, i.e., '
                      'resume an interrupted run.', {'action': 'store_true'}],
     ['--retries',    'Number of trials for downloading each data file '
-                     '(default: 3).', {'type': int, 'default': 3}],
+                     '(default: 5).', {'type': int, 'default': 5}],
     ['--delay',      'Seconds between two download trials (default: 5).',
                      {'type': int, 'default': 5}],
     ['--timeout',    'Seconds before program gives up waiting (default: 60).',
@@ -682,7 +682,7 @@ class Database(object):
             print('Failed to retrieve the following genomes:')
             print('  ' + ', '.join(failed))
             failed = set(failed)
-            self.df.query('genome in @failures', inplace=True)
+            self.df.query('genome not in @failed', inplace=True)
 
     def extract_genomes(self):
         """Extract genome sequences.
