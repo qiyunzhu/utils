@@ -416,6 +416,8 @@ class Database(object):
             n_ = self.df.shape[0]
             if n_ < n:
                 print('  ' + msg.format(n - n_))
+            if n_ == 0:
+                raise ValueError('No genome is retained.')
             n = n_
 
         # complete genomes only
@@ -480,6 +482,8 @@ class Database(object):
             n_ = self.df.shape[0]
             if n_ < n:
                 print('  ' + msg.format(n - n_))
+            if n_ == 0:
+                raise ValueError('No genome is retained.')
             n = n_
 
         # remove non-capitalized organism names
