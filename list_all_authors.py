@@ -15,11 +15,15 @@ Usage:
     Then execute: python me.py medline.txt > table.tsv
 
 Notes:
-    The PMID, date and affiliation correspond to the last co-authored paper as
-    determined by the data when it was recorded in PubMed.
+    The PMID, create date (CRDT) and affiliation correspond to the last
+    co-authored paper as determined by the data when it was recorded in PubMed.
     When multiple affiliations are present for one author in one paper, only the
     first affiliation is retained.
     Human review is recommended after the author list is generated.
+
+See Also:
+    https://www.nlm.nih.gov/bsd/mms/medlineelements.html
+
 """
 
 import fileinput
@@ -52,7 +56,7 @@ def main():
         elif key == 'AD':  # author department
             if authors[-1][1] is None:
                 authors[-1][1] = value
-        elif key == 'PHST' and value.endswith('[pubmed]'):
+        elif key == 'CRDT':
             date = value.split()[0]
 
     # add one publication record to author data
